@@ -1,0 +1,7 @@
+.dockerignore
+Dockerfile
+
+/Lib
+/.idea
+/Scripts
+/include
