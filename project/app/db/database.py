@@ -3,9 +3,9 @@ import asyncio
 
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker, declarative_base, Session
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-DB_URL = "postgresql+asyncpg://petProjectsUser:password@127.0.0.1/myCodeHedgehogDB"
+DB_URL = "postgresql+asyncpg://petProjectsUser:password@db:5432/myCodeHedgehogDB"
 DB_NAMING_CONVENTION = {
     "ix": 'ix_%(column_0_label)s',
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -21,7 +21,7 @@ metadata = MetaData(naming_convention=DB_NAMING_CONVENTION, bind=engine)
 Base = declarative_base(metadata=metadata)
 
 
-async def get_db() -> Session:
+async def get_db() -> SessionLocal:
     session = SessionLocal()
     async with session as db:
         try:

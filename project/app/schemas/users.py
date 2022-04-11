@@ -13,9 +13,9 @@ class UserRegister(UserLogin):
 
 
 class UserBaseData(BaseModel):
-    userId: int
+    user_id: int
     username: str
-    roleId: Optional[int] = None
+    role_id: Optional[int] = None
 
 
 class UserDetailedData(UserBaseData):
