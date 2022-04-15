@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update, exc
@@ -10,12 +12,17 @@ from app.models.users import User
 from app.models.roles import Role
 
 
-async def get_users_service():
-    async with SessionLocal() as db:
-        yield UsersService(db)
+class IUserService(ABC):
+    @abstractmethod
+    async def get_users(self):
+        pass
+
+    @abstractmethod
+    async def get_user(self, user_id: int):
+        pass
 
 
-class UsersService():
+class UsersService(IUserService):
     def __init__(self, db: AsyncSession):
         self.db = db
 
@@ -42,3 +49,10 @@ class UsersService():
             name=user.name,
             surname=user.surname
         )
+
+
+async def get_users_service() -> IUserService:
+    if not issubclass(UsersService, IUserService):
+        raise TypeError
+    async with SessionLocal() as db:
+        yield UsersService(db)

@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session
@@ -15,7 +17,17 @@ async def get_roles_service():
             yield RolesService(db)
 
 
-class RolesService():
+class IRolesService(ABC):
+    @abstractmethod
+    async def get_roles(self):
+        pass
+
+    @abstractmethod
+    async def get_role(self, role_id: int):
+        pass
+
+
+class RolesService(IRolesService):
     def __init__(self, db: SessionLocal):
         self.db = db
 
@@ -35,3 +47,11 @@ class RolesService():
             return None
 
         return RoleExtendedData(roleId=role_model.id, name=role_model.name)
+
+
+async def get_roles_service() -> IRolesService:
+    if not issubclass(RolesService, IRolesService):
+        raise TypeError
+    async with SessionLocal() as db:
+        async with db.begin():
+            yield RolesService(db)

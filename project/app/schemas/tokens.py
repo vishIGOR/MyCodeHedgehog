@@ -6,9 +6,9 @@ class AccessToken(BaseModel):
     access_token: str
 
 
-class RefreshToken(BaseModel):
+class RefreshTokenScheme(BaseModel):
     refresh_token: str
 
 
-class TokensPair(AccessToken, RefreshToken):
+class TokensPair(AccessToken, RefreshTokenScheme):
     pass
