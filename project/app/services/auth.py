@@ -44,7 +44,7 @@ class IAuthService(ABC):
         pass
 
     @abstractmethod
-    async def re_auth(self, user_id: int):
+    async def re_auth(self, token: RefreshTokenScheme):
         pass
 
 
@@ -83,16 +83,12 @@ class AuthService(IAuthService):
         user_id = user_model.id
         return await create_tokens_pair(self.db, user_id)
 
-    async def re_auth(self, tokens: TokensPair):
-        id_from_access = await authorize_and_get_id(self.db, tokens.access_token)
+    async def re_auth(self, token: RefreshTokenScheme):
         refresh_token_model = await get_refresh_token_by_string(self.db, tokens.refresh_token)
         if refresh_token_model is None:
-            print("test1")
-            raise unauthorized_exception
-        if id_from_access != refresh_token_model.user_id:
             raise unauthorized_exception
 
-        return await create_tokens_pair(self.db, id_from_access)
+        return await create_tokens_pair(self.db, refresh_token_model.user_id)
 
 
 async def get_auth_service() -> IAuthService:

@@ -12,6 +12,12 @@ class UserRegister(UserLogin):
     surname: str
 
 
+class UserPatchData(BaseModel):
+    password: Optional[str] = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
+
+
 class UserBaseData(BaseModel):
     user_id: int
     username: str

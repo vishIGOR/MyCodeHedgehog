@@ -21,6 +21,10 @@ class IUserService(ABC):
     async def get_user(self, user_id: int):
         pass
 
+    @abstractmethod
+    async def change_user(self, user_id: int):
+        pass
+
 
 class UsersService(IUserService):
     def __init__(self, db: AsyncSession):
