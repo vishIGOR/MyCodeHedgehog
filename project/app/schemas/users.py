@@ -13,9 +13,9 @@ class UserRegister(UserLogin):
 
 
 class UserPatchData(BaseModel):
-    password: Optional[str] = None
     name: Optional[str] = None
     surname: Optional[str] = None
+    password: Optional[str] = None
 
 
 class UserBaseData(BaseModel):
