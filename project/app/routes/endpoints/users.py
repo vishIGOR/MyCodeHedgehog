@@ -8,13 +8,17 @@ from app.schemas.users import UserLogin, UserRegister, UserBaseData, UserDetaile
 from app.schemas.tokens import AccessToken
 from app.models.users import User
 from app.db.database import get_db
+from app.helpers.errors_helper import raise_if_http_error
 
 router = APIRouter()
 
 
 @router.get("/users", response_model=[], tags=["users"])
 async def get_users(auth=Depends(authorize_only_admin), users_service: UsersService = Depends(get_users_service)):
-    return await users_service.get_users()
+    users = await users_service.get_users()
+
+    raise_if_http_error(users)
+    return users
 
 
 @router.get("/users/{id}", response_model=UserDetailedData, tags=["users"])
@@ -22,7 +26,9 @@ async def get_user(id: int, token=Depends(GET_BEARER_SCHEME),
                    users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
 
-    return await users_service.get_user(id)
+    user = await users_service.get_user(id)
+    raise_if_http_error(user)
+    return user
 
 
 @router.patch("/users/{id}", response_model=UserDetailedData, tags=["users"])
@@ -30,7 +36,9 @@ async def patch_user(id: int, user_dto: UserPatchData, token=Depends(GET_BEARER_
                      users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
 
-    return await users_service.change_user_data(id, user_dto)
+    user = await users_service.change_user_data(id, user_dto)
+    raise_if_http_error(user)
+    return user
 
 
 @router.delete("/users/{id}", tags=["users"])
@@ -38,7 +46,7 @@ async def delete_user(id: int, token=Depends(GET_BEARER_SCHEME),
                       users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
 
-    await users_service.delete_user(id)
+    raise_if_http_error(await users_service.delete_user(id))
     return status.HTTP_200_OK
 
 
@@ -47,7 +55,9 @@ async def get_avatar(id: int, token=Depends(GET_BEARER_SCHEME),
                      users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
 
-    return FileResponse(path=await users_service.get_user_picture_path(id), filename="avatar.png",
+    user_picture = await users_service.get_user_picture_path(id)
+    raise_if_http_error(user_picture)
+    return FileResponse(path=user_picture, filename="avatar.png",
                         media_type="image/png")
 
 
@@ -56,7 +66,7 @@ async def change_avatar(id: int, picture: UploadFile, token=Depends(GET_BEARER_S
                         users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
 
-    await users_service.change_user_picture(id, picture)
+    raise_if_http_error(await users_service.change_user_picture(id, picture))
     return status.HTTP_200_OK
 
 
@@ -65,5 +75,5 @@ async def delete_avatar(id: int, token=Depends(GET_BEARER_SCHEME),
                         users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
 
-    await users_service.delete_user_picture(id)
+    raise_if_http_error(await users_service.delete_user_picture(id))
     return status.HTTP_200_OK

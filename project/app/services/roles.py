@@ -44,7 +44,7 @@ class RolesService(IRolesService):
         try:
             role_model = (await self.db.execute(select(Role).where(Role.id == role_id))).scalars().one()
         except exc.NoResultFound:
-            return None
+            return HTTPException(400, detail="A role with this id doesn't exists")
 
         return RoleExtendedData(roleId=role_model.id, name=role_model.name)
 

@@ -6,6 +6,7 @@ from app.schemas.users import UserLogin, UserRegister, UserBaseData, UserDetaile
 from app.schemas.tokens import AccessToken, TokensPair, RefreshTokenScheme
 from app.models.users import User
 from app.db.database import get_db
+from app.helpers.errors_helper import raise_if_http_error
 
 router = APIRouter()
 
@@ -14,6 +15,7 @@ router = APIRouter()
 async def register_user(user_dto: UserRegister, auth_service: AuthService = Depends(get_auth_service)):
     tokens_pair = await auth_service.register_user(user_dto)
 
+    raise_if_http_error(tokens_pair)
     return tokens_pair
 
 
@@ -21,6 +23,7 @@ async def register_user(user_dto: UserRegister, auth_service: AuthService = Depe
 async def login_user(user_dto: UserLogin, auth_service: AuthService = Depends(get_auth_service)):
     tokens_pair = await auth_service.login_user(user_dto)
 
+    raise_if_http_error(tokens_pair)
     return tokens_pair
 
 
@@ -28,6 +31,7 @@ async def login_user(user_dto: UserLogin, auth_service: AuthService = Depends(ge
 async def login_user(token: RefreshTokenScheme, auth_service: AuthService = Depends(get_auth_service)):
     tokens_pair = await auth_service.re_auth(token)
 
+    raise_if_http_error(tokens_pair)
     return tokens_pair
 
 

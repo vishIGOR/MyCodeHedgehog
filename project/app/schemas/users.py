@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 
 
 class UserLogin(BaseModel):
@@ -7,15 +7,17 @@ class UserLogin(BaseModel):
     password: str
 
 
-class UserRegister(UserLogin):
-    name: str
-    surname: str
+class UserRegister(BaseModel):
+    username: constr(min_length=1, max_length=30)
+    password: constr(min_length=8, max_length=50)
+    name: constr(min_length=1, max_length=50)
+    surname: constr(min_length=1, max_length=50)
 
 
 class UserPatchData(BaseModel):
-    name: Optional[str] = None
-    surname: Optional[str] = None
-    password: Optional[str] = None
+    name: Optional[constr(min_length=1, max_length=50)] = None
+    surname: Optional[constr(min_length=1, max_length=50)] = None
+    password: Optional[constr(min_length=8, max_length=50)] = None
 
 
 class UserBaseData(BaseModel):

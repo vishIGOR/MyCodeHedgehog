@@ -1,1 +1,1 @@
-from app.models import roles, tokens, users
+from app.models import roles, tokens, users, topics

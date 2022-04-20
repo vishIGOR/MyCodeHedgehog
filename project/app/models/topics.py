@@ -7,7 +7,7 @@ from app.db.database import Base
 class Topic(Base):
     __tablename__ = "topics"
     id = Column(Integer(), primary_key=True, autoincrement=True)
-    name = Column(String(50), nullable=False)
+    name = Column(String(50), nullable=False, unique=True)
     description = Column(String(500), nullable=False)
     parent_id = Column(Integer(), ForeignKey("topics.id", ondelete="CASCADE"), nullable=True)
     parent = relationship("Topic")

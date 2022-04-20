@@ -52,7 +52,7 @@ class AuthService(IAuthService):
 
     async def register_user(self, user_dto: UserRegister):
         if (await is_user_with_username_exists(self.db, user_dto.username)):
-            raise HTTPException(status_code=400, detail="user with this username is already exists")
+            return HTTPException(status_code=400, detail="user with this username is already exists")
 
         new_user = User(username=user_dto.username,
                         name=user_dto.name,
@@ -64,7 +64,7 @@ class AuthService(IAuthService):
             self.db.add(new_user)
             await self.db.commit()
         except:
-            raise HTTPException(status_code=500, detail="unexpected server error")
+            return HTTPException(status_code=500, detail="unexpected server error")
 
         self.db.refresh(new_user)
         return await create_tokens_pair(self.db, new_user.id)
@@ -73,10 +73,10 @@ class AuthService(IAuthService):
         user_model = await get_user_by_username(self.db, user_dto.username)
 
         if user_model is None:
-            raise HTTPException(status_code=400, detail="incorrect login or password")
+            return HTTPException(status_code=400, detail="incorrect login or password")
 
         if not validate_password(user_dto.password, user_model.password):
-            raise HTTPException(status_code=400, detail="incorrect login or password")
+            return HTTPException(status_code=400, detail="incorrect login or password")
 
         user_id = user_model.id
         return await create_tokens_pair(self.db, user_id)
@@ -84,7 +84,7 @@ class AuthService(IAuthService):
     async def re_auth(self, token: RefreshTokenScheme):
         refresh_token_model = await get_refresh_token_by_string(self.db, token.refresh_token)
         if refresh_token_model is None:
-            raise UNAUTHORIZED_EXCEPTION
+            return UNAUTHORIZED_EXCEPTION
 
         return await create_tokens_pair(self.db, refresh_token_model.user_id)
 
@@ -145,7 +145,7 @@ async def create_tokens_pair(db: AsyncSession, user_id: int):
         db.add(new_refresh_token)
         await db.commit()
     except:
-        raise HTTPException(status_code=500, detail="unexpected server error")
+        return HTTPException(status_code=500, detail="unexpected server error")
 
     return TokensPair(access_token=access_token, refresh_token=generated_token)
 

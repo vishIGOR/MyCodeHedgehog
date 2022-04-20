@@ -63,7 +63,7 @@ class UsersService(IUserService):
 
     async def get_user(self, user_id: int):
         if not (await is_user_with_id_exists(self.db, user_id)):
-            raise HTTPException(400, "user doesn't exist")
+            return HTTPException(400, "user doesn't exist")
 
         user = await get_user_by_id(self.db, user_id)
 
@@ -89,7 +89,11 @@ class UsersService(IUserService):
             await self.db.delete(user)
             await self.db.commit()
         except exc:
-            raise HTTPException(500, "unexpected server error")
+            return HTTPException(500, "unexpected server error")
+
+        picture_name = f"{user_id}.png"
+        if is_file_exists(PATH_TO_AVATARS, picture_name):
+            delete_file(PATH_TO_AVATARS, picture_name)
 
     async def get_user_picture_path(self, user_id: int):
         picture_name = f"{user_id}.png"
@@ -100,9 +104,9 @@ class UsersService(IUserService):
 
     async def change_user_picture(self, user_id: int, picture: UploadFile):
         if not is_file_image(picture):
-            raise HTTPException(400, "Unsupported type of file")
+            raise HTTPException(415, "Unsupported type of file")
         if is_file_size_more_that(picture, 250):
-            raise HTTPException(400, "File is too big")
+            return HTTPException(400, "File is too big")
 
         print("test")
         save_file(picture, PATH_TO_AVATARS,
@@ -113,7 +117,7 @@ class UsersService(IUserService):
         if is_file_exists(PATH_TO_AVATARS, picture_name):
             delete_file(PATH_TO_AVATARS, picture_name)
         else:
-            raise HTTPException(400, "avatar doesn't exists")
+            return HTTPException(400, "avatar doesn't exists")
 
 
 async def get_users_service() -> IUserService:
