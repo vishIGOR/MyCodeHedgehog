@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -36,9 +36,35 @@ async def create_topic(topic_dto: TopicCreateData, auth=Depends(authorize_only_a
     return topic
 
 
+@router.delete("/topics/{id}", tags=["topics"])
+async def delete_topic(id: int, auth=Depends(authorize_only_admin),
+                       topics_service: TopicsService = Depends(get_topics_service)):
+    service_response = await topics_service.delete_topic(id)
+
+    raise_if_http_error(service_response)
+    return status.HTTP_200_OK
+
+
 @router.get("/topics/{id}/childs", response_model=TopicChilds, tags=["topics"])
 async def get_topic_childs(id: int, topics_service: TopicsService = Depends(get_topics_service)):
     childs = await topics_service.get_topic_childs(id)
 
     raise_if_http_error(childs)
     return childs
+
+
+@router.post("/topics/{id}/childs", response_model=TopicChilds, tags=["topics"])
+async def add_childs_to_topic(id: int, topics_service: TopicsService = Depends(get_topics_service)):
+    childs = await topics_service.get_topic_childs(id)
+
+    raise_if_http_error(childs)
+    return childs
+
+
+@router.delete("/topics/{id}/childs", response_model=TopicDataWithChilds, tags=["topics"])
+async def delete_topic_childs(id: int, childs: list[int], auth=Depends(authorize_only_admin),
+                              topics_service: TopicsService = Depends(get_topics_service)):
+    topic = await topics_service.delete_topic_childs(id, childs)
+
+    raise_if_http_error(topic)
+    return topic

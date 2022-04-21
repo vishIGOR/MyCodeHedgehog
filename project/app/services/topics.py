@@ -36,11 +36,11 @@ class ITopicsService(ABC):
         pass
 
     @abstractmethod
-    async def change_topic_childs(self, topic_id: int, childs: list[str]):
+    async def add_childs_to_topic(self, topic_id: int, childs: list[int]):
         pass
 
     @abstractmethod
-    async def delete_topic_childs(self, topic_id: int, childs: list[str]):
+    async def delete_topic_childs(self, topic_id: int, childs: list[int]):
         pass
 
 
@@ -84,7 +84,10 @@ class TopicsService(ITopicsService):
         pass
 
     async def delete_topic(self, topic_id: int):
-        pass
+        if not (await is_topic_with_id_exists(self.db, topic_id)):
+            return HTTPException(status_code=400, detail="topic with this id doesn't exist")
+
+        return await delete_topic_by_id(self.db, topic_id)
 
     async def get_topic_childs(self, topic_id: int):
         if not (await is_topic_with_id_exists(self.db, topic_id)):
@@ -92,11 +95,21 @@ class TopicsService(ITopicsService):
 
         return TopicChilds(childs=await get_topic_childs_by_id(self.db, topic_id))
 
-    async def change_topic_childs(self, topic_id: int, childs: list[str]):
+    async def add_childs_to_topic(self, topic_id: int, childs: list[int]):
         pass
 
-    async def delete_topic_childs(self, topic_id: int, childs: list[str]):
-        pass
+    async def delete_topic_childs(self, topic_id: int, childs: list[int]):
+        if not (await is_topic_with_id_exists(self.db, topic_id)):
+            return HTTPException(status_code=400, detail="topic with this id doesn't exist")
+
+        if not (await is_array_are_childs_of_topic(self.db, topic_id, childs)):
+            return HTTPException(status_code=400, detail="some topics are not childs")
+
+        await delete_childs_of_topic(self.db, topic_id, childs)
+
+        return await get_topic_with_childs_by_id(self.db, topic_id)
+
+
 
 
 async def get_topics_service() -> ITopicsService:
