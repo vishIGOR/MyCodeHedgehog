@@ -33,8 +33,3 @@ async def login_user(token: RefreshTokenScheme, auth_service: AuthService = Depe
 
     raise_if_http_error(tokens_pair)
     return tokens_pair
-
-
-@router.post("/auth/test", tags=["auth"])
-async def test(refreshToken=Header(None, alias="refresh_token")):
-    return refreshToken

@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy import update, exc
+from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException
 
 from app.models.users import User
@@ -80,8 +81,8 @@ async def update_user_using_patch_dto(db: AsyncSession, user_id: int, user_dto: 
         q = q.values(password=new_dto.password)
         await (db.execute(q))
         await db.commit()
-    except exc as e:
-        raise HTTPException(400, "some data is strange")
+    except SQLAlchemyError:
+        return HTTPException(500, "smth gone wrong")
 
 
 async def get_user_patch_dto_by_id(db: AsyncSession, user_id: int):

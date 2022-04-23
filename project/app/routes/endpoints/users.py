@@ -13,7 +13,7 @@ from app.helpers.errors_helper import raise_if_http_error
 router = APIRouter()
 
 
-@router.get("/users", response_model=[], tags=["users"])
+@router.get("/users", response_model=[], tags=["users"], description="Only for admin")
 async def get_users(auth=Depends(authorize_only_admin), users_service: UsersService = Depends(get_users_service)):
     users = await users_service.get_users()
 
@@ -21,7 +21,8 @@ async def get_users(auth=Depends(authorize_only_admin), users_service: UsersServ
     return users
 
 
-@router.get("/users/{id}", response_model=UserDetailedData, tags=["users"])
+@router.get("/users/{id}", response_model=UserDetailedData, tags=["users"],
+            description="Only for admin or accaunt's owner")
 async def get_user(id: int, token=Depends(GET_BEARER_SCHEME),
                    users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
@@ -31,7 +32,8 @@ async def get_user(id: int, token=Depends(GET_BEARER_SCHEME),
     return user
 
 
-@router.patch("/users/{id}", response_model=UserDetailedData, tags=["users"])
+@router.patch("/users/{id}", response_model=UserDetailedData, tags=["users"],
+              description="Only for admin or accaunt's owner")
 async def patch_user(id: int, user_dto: UserPatchData, token=Depends(GET_BEARER_SCHEME),
                      users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
@@ -41,7 +43,7 @@ async def patch_user(id: int, user_dto: UserPatchData, token=Depends(GET_BEARER_
     return user
 
 
-@router.delete("/users/{id}", tags=["users"])
+@router.delete("/users/{id}", tags=["users"], description="Only for admin or accaunt's owner")
 async def delete_user(id: int, token=Depends(GET_BEARER_SCHEME),
                       users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
@@ -50,7 +52,8 @@ async def delete_user(id: int, token=Depends(GET_BEARER_SCHEME),
     return status.HTTP_200_OK
 
 
-@router.get("/users/{id}/profilePicture", response_class=FileResponse, tags=["users"])
+@router.get("/users/{id}/profilePicture", response_class=FileResponse, tags=["users"],
+            description="Only for admin or accaunt's owner")
 async def get_avatar(id: int, token=Depends(GET_BEARER_SCHEME),
                      users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
@@ -61,7 +64,7 @@ async def get_avatar(id: int, token=Depends(GET_BEARER_SCHEME),
                         media_type="image/png")
 
 
-@router.post("/users/{id}/profilePicture", tags=["users"])
+@router.post("/users/{id}/profilePicture", tags=["users"], description="Only for admin or accaunt's owner")
 async def change_avatar(id: int, picture: UploadFile, token=Depends(GET_BEARER_SCHEME),
                         users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
@@ -70,7 +73,7 @@ async def change_avatar(id: int, picture: UploadFile, token=Depends(GET_BEARER_S
     return status.HTTP_200_OK
 
 
-@router.delete("/users/{id}/profilePicture", tags=["users"])
+@router.delete("/users/{id}/profilePicture", tags=["users"], description="Only for admin or accaunt's owner")
 async def delete_avatar(id: int, token=Depends(GET_BEARER_SCHEME),
                         users_service: UsersService = Depends(get_users_service), db=Depends(get_db)):
     await check_for_admin_role_or_id_by_token(db, user_id=id, token=token)
